@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学霸养成记 - 高中生学习复盘系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <h1><i class="fas fa-graduation-cap"></i> 学霸养成记</h1>
+                <div class="user-level">
+                    <span class="level-badge" id="userLevel">Lv.1 学习者</span>
+                    <div class="exp-bar">
+                        <div class="exp-fill" id="expFill"></div>
+                        <span class="exp-text" id="expText">0/100 EXP</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="stats">
+                    <div class="stat-item">
+                        <i class="fas fa-coins"></i>
+                        <span id="totalPoints">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-fire"></i>
+                        <span id="streakDays">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 侧边导航 -->
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li class="nav-item active" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>仪表盘</span>
+                    </li>
+                    <li class="nav-item" data-tab="grades">
+                        <i class="fas fa-chart-line"></i>
+                        <span>成绩管理</span>
+                    </li>
+                    <li class="nav-item" data-tab="study-methods">
+                        <i class="fas fa-brain"></i>
+                        <span>学习方法</span>
+                    </li>
+                    <li class="nav-item" data-tab="papers">
+                        <i class="fas fa-file-alt"></i>
+                        <span>试卷整理</span>
+                    </li>
+                    <li class="nav-item" data-tab="achievements">
+                        <i class="fas fa-trophy"></i>
+                        <span>成就系统</span>
+                    </li>
+                    <li class="nav-item" data-tab="shop">
+                        <i class="fas fa-store"></i>
+                        <span>奖励商城</span>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <!-- 仪表盘 -->
+                <section id="dashboard" class="tab-content active">
+                    <div class="dashboard-grid">
+                        <div class="card welcome-card">
+                            <h2>欢迎回来！</h2>
+                            <p>今天也要加油学习哦~ 💪</p>
+                            <div class="quick-actions">
+                                <button class="btn btn-primary" onclick="showAddGradeModal()">
+                                    <i class="fas fa-plus"></i> 录入成绩
+                                </button>
+                                <button class="btn btn-secondary" onclick="startStudySession()">
+                                    <i class="fas fa-play"></i> 开始学习
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card stats-card">
+                            <h3>学习统计</h3>
+                            <div class="stats-grid">
+                                <div class="stat">
+                                    <div class="stat-value" id="totalSubjects">0</div>
+                                    <div class="stat-label">科目数</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value" id="avgScore">0</div>
+                                    <div class="stat-label">平均分</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value" id="studyDays">0</div>
+                                    <div class="stat-label">学习天数</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value" id="totalPapers">0</div>
+                                    <div class="stat-label">试卷数</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card chart-card">
+                            <h3>成绩趋势</h3>
+                            <canvas id="gradeChart"></canvas>
+                        </div>
+
+                        <div class="card recent-activity">
+                            <h3>最近活动</h3>
+                            <div id="recentActivities">
+                                <p class="no-data">暂无活动记录</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 成绩管理 -->
+                <section id="grades" class="tab-content">
+                    <div class="section-header">
+                        <h2>成绩管理</h2>
+                        <button class="btn btn-primary" onclick="showAddGradeModal()">
+                            <i class="fas fa-plus"></i> 添加成绩
+                        </button>
+                    </div>
+                    
+                    <div class="grades-container">
+                        <div class="card">
+                            <h3>科目成绩</h3>
+                            <div class="subjects-grid" id="subjectsGrid">
+                                <!-- 科目卡片将在这里动态生成 -->
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>成绩详情</h3>
+                            <div class="grade-details" id="gradeDetails">
+                                <p class="no-data">选择科目查看详细成绩</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 学习方法 -->
+                <section id="study-methods" class="tab-content">
+                    <div class="section-header">
+                        <h2>学习方法指导</h2>
+                    </div>
+                    
+                    <div class="methods-grid">
+                        <div class="method-card" data-method="pomodoro">
+                            <div class="method-icon">🍅</div>
+                            <h3>番茄工作法</h3>
+                            <p>25分钟专注学习 + 5分钟休息</p>
+                            <button class="btn btn-primary" onclick="startPomodoro()">开始番茄钟</button>
+                        </div>
+
+                        <div class="method-card" data-method="feynman">
+                            <div class="method-icon">🧠</div>
+                            <h3>费曼学习法</h3>
+                            <p>用简单的话解释复杂概念</p>
+                            <button class="btn btn-primary" onclick="showFeynmanGuide()">学习指导</button>
+                        </div>
+
+                        <div class="method-card" data-method="spaced">
+                            <div class="method-icon">📅</div>
+                            <h3>间隔重复</h3>
+                            <p>基于遗忘曲线的复习计划</p>
+                            <button class="btn btn-primary" onclick="createReviewPlan()">制定计划</button>
+                        </div>
+
+                        <div class="method-card" data-method="smart">
+                            <div class="method-icon">🎯</div>
+                            <h3>SMART目标</h3>
+                            <p>制定具体可衡量的学习目标</p>
+                            <button class="btn btn-primary" onclick="setSmartGoal()">设定目标</button>
+                        </div>
+
+                        <div class="method-card" data-method="mindmap">
+                            <div class="method-icon">🗺️</div>
+                            <h3>思维导图</h3>
+                            <p>可视化知识结构和关联</p>
+                            <button class="btn btn-primary" onclick="createMindMap()">创建导图</button>
+                        </div>
+
+                        <div class="method-card" data-method="mistakes">
+                            <div class="method-icon">📝</div>
+                            <h3>错题本</h3>
+                            <p>整理和复习错误题目</p>
+                            <button class="btn btn-primary" onclick="openMistakeBook()">打开错题本</button>
+                        </div>
+                    </div>
+
+                    <!-- 番茄钟计时器 -->
+                    <div id="pomodoroTimer" class="timer-modal" style="display: none;">
+                        <div class="timer-content">
+                            <h3>番茄工作法</h3>
+                            <div class="timer-display">
+                                <div class="time" id="timerDisplay">25:00</div>
+                                <div class="timer-status" id="timerStatus">准备开始</div>
+                            </div>
+                            <div class="timer-controls">
+                                <button class="btn btn-primary" id="startTimer">开始</button>
+                                <button class="btn btn-secondary" id="pauseTimer">暂停</button>
+                                <button class="btn btn-danger" id="resetTimer">重置</button>
+                                <button class="btn btn-outline" onclick="closePomodoroTimer()">关闭</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 试卷整理 -->
+                <section id="papers" class="tab-content">
+                    <div class="section-header">
+                        <h2>试卷整理</h2>
+                        <button class="btn btn-primary" onclick="showAddPaperModal()">
+                            <i class="fas fa-plus"></i> 添加试卷
+                        </button>
+                    </div>
+                    
+                    <div class="papers-container">
+                        <div class="papers-filters">
+                            <select id="subjectFilter" onchange="filterPapers()">
+                                <option value="">所有科目</option>
+                            </select>
+                            <select id="typeFilter" onchange="filterPapers()">
+                                <option value="">所有类型</option>
+                                <option value="exam">考试</option>
+                                <option value="quiz">小测</option>
+                                <option value="homework">作业</option>
+                                <option value="practice">练习</option>
+                            </select>
+                            <input type="text" id="searchPapers" placeholder="搜索试卷..." onkeyup="filterPapers()">
+                        </div>
+
+                        <div class="papers-content">
+                            <div class="papers-grid" id="papersGrid">
+                                <!-- 试卷卡片将在这里动态生成 -->
+                            </div>
+                            <div class="paper-details" id="paperDetails">
+                                <p class="no-data">点击试卷查看详细信息</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 成就系统 -->
+                <section id="achievements" class="tab-content">
+                    <div class="section-header">
+                        <h2>成就系统</h2>
+                    </div>
+                    
+                    <div class="achievements-container">
+                        <div class="card">
+                            <h3>我的成就</h3>
+                            <div class="achievements-grid" id="achievementsGrid">
+                                <!-- 成就徽章将在这里动态生成 -->
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>进度追踪</h3>
+                            <div class="progress-list" id="progressList">
+                                <!-- 进度条将在这里动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 奖励商城 -->
+                <section id="shop" class="tab-content">
+                    <div class="section-header">
+                        <h2>奖励商城</h2>
+                        <div class="points-display">
+                            <i class="fas fa-coins"></i>
+                            <span id="shopPoints">0</span> 积分
+                        </div>
+                    </div>
+                    
+                    <div class="shop-container">
+                        <div class="shop-grid" id="shopGrid">
+                            <!-- 商品将在这里动态生成 -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- 模态框 -->
+    <!-- 添加成绩模态框 -->
+    <div id="addGradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加成绩</h3>
+                <span class="close" onclick="closeModal('addGradeModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="gradeForm">
+                    <div class="form-group">
+                        <label for="subject">科目</label>
+                        <input type="text" id="subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="score">分数</label>
+                        <input type="number" id="score" min="0" max="150" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fullScore">满分</label>
+                        <input type="number" id="fullScore" min="1" max="150" value="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="examDate">考试日期</label>
+                        <input type="date" id="examDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="examType">考试类型</label>
+                        <select id="examType" required>
+                            <option value="">请选择</option>
+                            <option value="月考">月考</option>
+                            <option value="期中">期中考试</option>
+                            <option value="期末">期末考试</option>
+                            <option value="模拟">模拟考试</option>
+                            <option value="小测">小测验</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">备注</label>
+                        <textarea id="notes" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addGradeModal')">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加试卷模态框 -->
+    <div id="addPaperModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加试卷</h3>
+                <span class="close" onclick="closeModal('addPaperModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="paperForm">
+                    <div class="form-group">
+                        <label for="paperSubject">科目</label>
+                        <input type="text" id="paperSubject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="paperTitle">试卷标题</label>
+                        <input type="text" id="paperTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="paperType">类型</label>
+                        <select id="paperType" required>
+                            <option value="">请选择</option>
+                            <option value="exam">考试</option>
+                            <option value="quiz">小测</option>
+                            <option value="homework">作业</option>
+                            <option value="practice">练习</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="paperDate">日期</label>
+                        <input type="date" id="paperDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="paperScore">得分</label>
+                        <input type="number" id="paperScore" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="paperFullScore">满分</label>
+                        <input type="number" id="paperFullScore" min="1" value="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="paperNotes">备注/错题记录</label>
+                        <textarea id="paperNotes" rows="4"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('addPaperModal')">取消</button>
+                        <button type="submit" class="btn btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script-simple.js"></script>
+</body>
+</html>
